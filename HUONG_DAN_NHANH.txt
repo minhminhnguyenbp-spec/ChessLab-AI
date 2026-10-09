@@ -1,0 +1,29 @@
+CHESSLAB AI - HUONG DAN CHAY TREN WINDOWS
+
+KHONG mo truc tiep index.html bang cach bam dup.
+
+CACH DE NHAT:
+  1. Cai Node.js LTS: https://nodejs.org/
+  2. Giai nen TOAN BO thu muc (khong chay trong ZIP).
+  3. Mo thu muc ChessLab_VSCode va BAM DUP file CHAY_CHESSLAB.bat.
+  4. Lan dau may tu chay npm install (can Internet). Cho tai xong.
+  5. Trinh duyet tu mo trang http://localhost:5173/
+  6. Giu cua so cmd dang mo trong suot luc choi.
+
+CACH CHAY TRONG VS CODE:
+  File > Open Folder > ChessLab_VSCode
+  Terminal > New Terminal
+  npm install
+  npm run dev
+  Mo dia chi localhost do terminal hien thi (thuong la http://localhost:5173/).
+
+NEU LOI:
+  - npm is not recognized: cai Node.js LTS, mo lai VS Code.
+  - Trang khong co ban co/giao dien: dang mo file index.html thay vi localhost.
+  - Stockfish chua san sang: can ket noi Internet khi cai lan dau, chay lai npm install.
+  - Neu 5173 da bi su dung, Vite chon cong khac (5174...), mo dia chi terminal thong bao.
+
+LUU Y: Elo bot la muc gia lap theo Stockfish, khong phai Elo FIDE/Chess.com.
+Nhan !! Thien tai duoc tinh theo quy tac uoc tinh, khong phai he thong Chess.com.
+
+CAP NHAT: Huy hieu !!, !, ?, ?? cua nuoc ban di se giu nguyen qua luot Bot; chi thay doi khi ban di nuoc tiep theo.

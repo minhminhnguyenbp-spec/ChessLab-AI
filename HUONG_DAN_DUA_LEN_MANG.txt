@@ -1,0 +1,44 @@
+CHESSLAB AI - HƯỚNG DẪN ĐƯA LÊN INTERNET (GitHub Pages)
+
+A. ĐẨY MÃ NGUỒN LÊN GITHUB (CÁCH DỄ NHẤT: DANG_LEN_GITHUB.bat)
+- Cài Git for Windows https://git-scm.com/downloads/win, khởi động lại máy hoặc VS Code.
+- Tạo repository Public, rỗng ở https://github.com/new.
+- Nhấp đôi file DANG_LEN_GITHUB.bat rồi nhập username / tên repo.
+- Nếu chưa cài Git hoặc cần xem rõ từng lệnh, xem cách dùng VS Code bên dưới.
+
+A2. ĐẨY MÃ NGUỒN LÊN GITHUB TỪ VS CODE
+1. Vào https://github.com/new tạo repository trống tên ChessLab-AI.
+   Chọn Public. KHÔNG tích "Add a README file".
+2. Mở thư mục ChessLab_GitHub_Pages trong VS Code.
+3. Mở Terminal trong VS Code, chạy lần lượt:
+   git init
+   git add .
+   git commit -m "Deploy ChessLab AI"
+   git branch -M main
+   git remote add origin https://github.com/TEN_TAI_KHOAN/ChessLab-AI.git
+   git push -u origin main
+   (Thay TEN_TAI_KHOAN bằng tên GitHub của bạn.)
+   Nếu git bị lỗi "not recognized", cài Git for Windows tại https://git-scm.com/.
+   Nếu đã có origin: git remote set-url origin https://github.com/TEN_TAI_KHOAN/ChessLab-AI.git
+
+B. BẬT GITHUB PAGES
+4. Mở repo GitHub vừa tạo → Settings → Pages.
+5. Tại Build and deployment / Source chọn GitHub Actions.
+6. Vào tab Actions → workflow "Publish ChessLab AI to GitHub Pages".
+   Nếu workflow chưa tự chạy, chọn Run workflow → Run workflow.
+7. Chờ build và deploy hiện dấu tích xanh.
+8. Mở link tại Settings → Pages (hoặc trong Actions → Deploy).
+   Thường có dạng https://TEN_TAI_KHOAN.github.io/ChessLab-AI/
+
+C. LƯU Ý
+- Không tải node_modules hoặc dist lên GitHub. .gitignore đã loại trừ.
+- Bản này gồm GitHub Actions tự cài thư viện, tải Stockfish, build web.
+- Website là chơi cờ với Bot trên trình duyệt, KHÔNG phải chơi giữa 2 người qua mạng.
+- Khi lần đầu truy cập, Stockfish cần tải file .wasm nên có thể chờ vài giây.
+- Nếu website có bàn cờ nhưng Bot không tải: bấm Ctrl+F5 và xem tab Actions có build xanh hay không.
+- Không đưa mật khẩu hoặc token GitHub vào mã nguồn.
+
+D. MUỐN KHỎI DÙNG GIT?
+Có thể tạo repo ở https://github.com/new rồi dùng Add file → Upload files,
+nhưng phải tải file và thư mục giữ đúng cấu trúc, kể cả .github/workflows/deploy.yml.
+Không được upload ZIP như một file duy nhất và mong GitHub Pages tự chạy.

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0c1020" />
+  <meta name="description" content="ChessLab – luyện cờ vua với Stockfish, tùy chỉnh Elo và phân tích từng nước." />
+  <title>ChessLab • Đấu Bot & phân tích nước đi</title>
+  <script>
+    // Hướng dẫn rõ ràng khi người dùng mở trực tiếp index.html (file://).
+    if (location.protocol === 'file:') {
+      window.addEventListener('DOMContentLoaded', () => {
+        const banner = document.createElement('div');
+        banner.setAttribute('role', 'alert');
+        banner.style.cssText = 'position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#0b1021;color:#fff;font:16px/1.7 Arial,sans-serif;padding:24px;box-sizing:border-box';
+        banner.innerHTML = '<div style="max-width:620px;background:#18233c;border:1px solid #475a82;border-radius:18px;padding:32px;box-shadow:0 16px 70px #0008"><h1 style="margin:0 0 12px">⚠ Chưa khởi động ChessLab</h1><p>Không mở trực tiếp <b>index.html</b>. Dự án cần máy chủ Vite và thư viện Stockfish để hiển thị bàn cờ.</p><p><b>Cách dễ nhất trên Windows:</b> quay lại thư mục và nhấp đúp file <code>CHAY_CHESSLAB.bat</code>.</p><p><b>Hoặc trong VS Code:</b> chạy <code>npm install</code> rồi <code>npm run dev</code>, sau đó mở <b>http://localhost:5173/</b> (hoặc địa chỉ Terminal hiển thị).</p></div>';
+        document.body.appendChild(banner);
+      });
+    }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="ChessLab trang chủ"><span class="brand-logo">♞</span><span>CHESS<span class="brand-color">LAB</span><small>AI CHESS STUDIO</small></span></a>
+      <div class="top-actions"><button class="fullscreen-toggle" id="btn-fullscreen" type="button" aria-label="Bật chế độ toàn màn hình" aria-pressed="false" title="Toàn màn hình (hoặc nhấn F11)"><span class="fullscreen-symbol" aria-hidden="true">⛶</span><span class="fullscreen-word">Toàn màn hình</span></button><span class="chip"><span class="status-dot" id="engine-dot"></span><span id="engine-status">Đang tải Stockfish...</span></span><button class="icon-btn" id="btn-help" title="Hướng dẫn" aria-label="Hướng dẫn">?</button></div>
+    </header>
+    <main class="workspace">
+      <section class="board-panel">
+        <div class="game-heading"><div><div class="eyebrow"><span class="sparkle">✦</span> TRAINING ARENA <span class="separator-dot">•</span> ENGINE POWERED</div><h1>Chơi cờ. <em>Tiến bộ.</em></h1><p>Đối đầu Stockfish; xem ngay dấu đánh giá và mũi tên trên quân vừa đi.</p></div><span class="game-tag">VS AI <span>●</span> LIVE</span></div>
+        <div class="player-strip opponent"><div class="avatar black">♚</div><div class="identity"><b>Stockfish AI</b><span>Đối thủ <span id="bot-elo-label">1500 Elo</span></span></div><div class="player-mark" id="bot-thinking">Sẵn sàng</div></div>
+        <div class="board-frame"><div class="board" id="board" aria-label="Bàn cờ vua 8 x 8"></div><svg id="arrow-layer" class="arrow-layer" viewBox="0 0 800 800" aria-hidden="true"><defs><marker id="arrowhead" markerWidth="5" markerHeight="5" refX="3.5" refY="2.5" orient="auto"><path d="M0 0 L5 2.5 L0 5 Z" fill="#a855f7" /></marker><marker id="review-arrowhead" markerWidth="5" markerHeight="5" refX="3.5" refY="2.5" orient="auto"><path id="review-arrowhead-path" d="M0 0 L5 2.5 L0 5 Z" fill="#f16a77" /></marker></defs><line id="review-arrow" x1="0" y1="0" x2="0" y2="0" stroke="#f16a77" stroke-width="13" stroke-opacity=".68" stroke-linecap="round" marker-end="url(#review-arrowhead)" style="display:none" /><line id="hint-arrow" x1="0" y1="0" x2="0" y2="0" stroke="#a855f7" stroke-width="13" stroke-linecap="round" marker-end="url(#arrowhead)" style="display:none" /><g id="review-badge" style="display:none"><title id="review-badge-title"></title><circle id="review-badge-circle" cx="0" cy="0" r="21" stroke="#fff" stroke-width="3"/><text id="review-badge-text" x="0" y="0" font-family="Arial, sans-serif" font-size="26" font-weight="900" dominant-baseline="middle" text-anchor="middle" fill="white" stroke="none"></text></g></svg></div>
+        <div class="player-strip self"><div class="avatar white">♔</div><div class="identity"><b>Bạn <span class="you-badge">YOU</span></b><span id="you-color">Quân Trắng</span></div><span class="turn-indicator" id="turn-indicator">Đến lượt bạn</span></div>
+        <div class="board-controls"><button class="control" id="btn-new">↻ <span>Ván mới</span></button><button class="control" id="btn-undo">↶ <span>Hoàn tác</span></button><button class="control" id="btn-hint">✧ <span>Gợi ý</span></button><button class="control" id="btn-flip">⇅ <span>Đổi góc nhìn</span></button></div>
+        <div class="game-notice" id="game-message" role="status">Chọn quân cờ để bắt đầu. Các ô hợp lệ sẽ được đánh dấu.</div>
+      </section>
+      <aside class="sidebar">
+        <div class="tabs"><button class="tab active" data-tab="analysis">✦ Phân tích</button><button class="tab" data-tab="settings">⚙ Cài đặt</button><button class="tab" data-tab="history">☷ Lịch sử</button></div>
+        <section class="pane active" id="pane-analysis">
+          <div class="section-top"><div><div class="eyebrow">REAL-TIME INSIGHTS</div><h2>Phân tích AI <span class="mini-spark">✦</span></h2></div><span class="analysis-status" id="analysis-status">Đang khởi tạo</span></div>
+          <div class="eval-card"><div class="eval-top"><span>Đánh giá vị trí</span><span class="engine-caption">STOCKFISH 19 • LITE</span></div><div class="eval-value" id="eval-value">0.00 <small>cân bằng</small></div><div class="eval-track"><div id="eval-black" class="eval-black"></div><div id="eval-white" class="eval-white"></div><span class="eval-mid"></span></div><div class="eval-sides"><span>♚ Đen</span><span>♔ Trắng</span></div></div>
+          <div class="verdict-card" id="verdict-card"><div class="verdict-icon" id="verdict-icon">✦</div><div><div class="verdict-label" id="verdict-title">Chờ nước đi đầu tiên</div><p id="verdict-desc">Sau mỗi nước, AI sẽ tìm nước tối ưu, tính chênh lệch đánh giá và giải thích độ chính xác.</p></div></div>
+          <div class="best-box"><div class="subheading"><span>✧ NƯỚC ĐI TỐI ƯU</span><span class="label-soft">ENGINE CHOICE</span></div><div class="best-line"><span id="best-move">—</span><span id="best-description">Phân tích được cập nhật sau mỗi nước đi.</span></div></div>
+          <div class="stats-row"><div class="stat"><span>Độ chính xác ước tính</span><b id="accuracy">—</b></div><div class="stat"><span>Điểm mất (CP)</span><b id="cp-loss">—</b></div><div class="stat"><span>Nước đã đi</span><b id="move-count">0</b></div></div>
+          <div class="section-heading history-heading"><h3>Nước đi gần đây <span class="brilliant-count" id="brilliant-count">!! 0 thiên tài</span></h3><button class="small-link" id="btn-show-history">Xem tất cả →</button></div><div class="recent-moves" id="recent-moves"><p class="empty-text">Chưa có nước đi nào.</p></div>
+          <div class="subtle-info">Nhãn <strong>!! Thiên tài</strong> chỉ dành cho nước gần tối ưu có dấu hiệu hy sinh quân hợp lý. Các nhãn và độ chính xác đều là <strong>ước tính</strong> từ việc so sánh đánh giá Stockfish theo thời gian tìm kiếm giới hạn, không phải phép đo chính thức của Chess.com.</div>
+        </section>
+        <section class="pane" id="pane-settings">
+          <div class="section-top"><div><div class="eyebrow">CUSTOMIZE YOUR MATCH</div><h2>Thiết lập ván đấu</h2></div></div>
+          <div class="form-group"><label for="elo-slider">Sức mạnh đối thủ <strong id="elo-output">1500 Elo</strong></label><input type="range" min="1320" max="3190" step="10" value="1500" id="elo-slider" /><div class="range-ends"><span>1320 · Dễ hơn</span><span>3190 · Rất khó</span></div><div class="preset-row"><button class="preset" data-elo="1320">1320</button><button class="preset active" data-elo="1500">1500</button><button class="preset" data-elo="2000">2000</button><button class="preset" data-elo="2500">2500</button></div></div>
+          <div class="form-group"><label>Chơi với quân</label><div class="choice-row"><label class="choice selected"><input type="radio" name="side" value="w" checked /><span>♔</span> Trắng</label><label class="choice"><input type="radio" name="side" value="b" /><span>♚</span> Đen</label></div></div>
+          <div class="form-group"><label for="think-time">Thời gian Bot suy nghĩ</label><select id="think-time"><option value="400">Nhanh · 0.4 giây</option><option value="850" selected>Cân bằng · 0.85 giây</option><option value="1600">Sâu hơn · 1.6 giây</option><option value="3000">Rất sâu · 3 giây</option></select></div>
+          <div class="form-group"><label for="analysis-time">Độ sâu phân tích</label><select id="analysis-time"><option value="250">Nhanh · 0.25 giây / vị trí</option><option value="600" selected>Cân bằng · 0.6 giây / vị trí</option><option value="1200">Kỹ · 1.2 giây / vị trí</option></select><p class="form-note">Mỗi nước cần 2 lần đánh giá: trước và sau nước đi. Máy yếu nên dùng mức nhanh.</p></div>
+          <button class="primary-btn" id="btn-apply">♞ &nbsp; Bắt đầu ván với thiết lập này</button><div class="setting-warning"><b>Elo chỉ mang tính ước lượng.</b> Stockfish sử dụng UCI_LimitStrength/UCI_Elo; sức mạnh thực tế phụ thuộc phiên bản engine, phần cứng và thời gian suy nghĩ. Không đồng nhất với Elo FIDE, Lichess hoặc Chess.com.</div>
+        </section>
+        <section class="pane" id="pane-history"><div class="section-top"><div><div class="eyebrow">GAME REVIEW</div><h2>Lịch sử nước đi</h2></div></div><div class="review-nav"><button id="go-start">⏮</button><button id="go-back">◀</button><button id="go-forward">▶</button><button id="go-end">⏭</button></div><p class="review-note" id="review-note">Chọn một nước để xem vị trí trên bàn cờ.</p><div class="full-history" id="full-history"><p class="empty-text">Chưa có nước đi.</p></div><div class="export-row"><button id="btn-pgn">↓ Tải PGN</button><button id="btn-fen">▢ Sao chép FEN</button></div></section>
+        <footer class="app-footer">CHESSLAB <span>·</span> Powered by Stockfish & chess.js <span>·</span> Chạy trên trình duyệt</footer>
+      </aside>
+    </main>
+  </div>
+  <div class="modal-backdrop hidden" id="promotion-modal"><div class="modal"><h2>Phong cấp tốt</h2><p>Chọn quân muốn phong cấp</p><div class="promotion-options" id="promotion-options"></div></div></div>
+  <div class="modal-backdrop hidden" id="help-modal"><div class="modal modal-help"><button class="close-modal" id="close-help">×</button><h2>Hướng dẫn ChessLab</h2><p><b>1.</b> Bấm hoặc kéo quân để di chuyển. Các dấu chấm là nước hợp lệ.</p><p><b>2.</b> Mở <b>Cài đặt</b> để đổi Elo và màu quân, sau đó nhấn <b>Bắt đầu ván</b>.</p><p><b>3.</b> Tab <b>Phân tích</b> xếp loại nước theo mức giảm đánh giá so với nước Stockfish đề xuất (CP = 1/100 quân tốt).</p><p><b>4.</b> <b>!! Thiên tài</b> là nước gần tối ưu có dấu hiệu hy sinh quân thực sự (mã, tượng, xe, hậu), không đơn thuần đi đúng nước mạnh nhất. Nhãn này là ước tính của ChessLab, không phải nhãn chính thức Chess.com.</p><p><b>5.</b> <b>Gợi ý</b> vẽ mũi tên nước nên đi. Tab <b>Lịch sử</b> cho phép xem lại ván và xuất PGN.</p><p><b>Lưu ý:</b> Website hoạt động với Bot ngay trong trình duyệt. Để chơi người-với-người qua Internet cần có máy chủ/multiplayer riêng.</p></div></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
